@@ -7,14 +7,14 @@
 ### 1. 启动服务（首次需等待模型加载约 2-3 分钟）
 
 ```bash
-cd /Users/tanyanwen/asr_project
+cd asr_project
 python3 asr.py start
 ```
 
 等待显示：
 ```
 🚀 正在启动 ASR 服务...
-📁 识别结果将保存到：/Users/tanyanwen/asr_project/transcripts/2026-06-28_1450.txt
+📁 识别结果将保存到：asr_project/transcripts/2026-06-28_1450.txt
 --------------------------------------------------
 ==================================================
 ✅ FunASR 模型已加载完成
@@ -65,7 +65,7 @@ python3 asr.py devices
 
 ```txt
 # 识别开始时间：2026-06-28 14:50:22
-# 输出文件：/Users/tanyanwen/asr_project/transcripts/2026-06-28_1449.txt
+# 输出文件：asr_project/transcripts/2026-06-28_1449.txt
 # 音频设备：Built-in Microphone
 
 [14:50:24] 力啊
