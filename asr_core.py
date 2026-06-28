@@ -100,6 +100,9 @@ def recognize_audio(model, output_file):
     buffer_duration = 10.0  # 10 秒识别一次（确保句子完整）
     sample_rate = 16000
     
+    # 新增：音量阈值参数（0.0-1.0，建议 0.03-0.05）
+    volume_threshold = 0.04  # 低于此值认为是静音/噪音，跳过识别
+    
     # 启动时立即创建文件并写入头部
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(f"# 识别开始时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
@@ -142,11 +145,23 @@ def recognize_audio(model, output_file):
                 
                 # 合并音频块
                 audio_data = np.vstack(audio_buffer)
-                audio_buffer = []
                 
                 # 转换为单声道
                 if audio_data.ndim > 1:
                     audio_data = audio_data.mean(axis=1)
+                
+                # 计算音频音量（RMS 值）
+                rms = np.sqrt(np.mean(audio_data ** 2))
+                print(f"💬 检测到音量：{rms:.4f} (阈值：{volume_threshold})", end="")
+                
+                # 如果音量低于阈值，跳过识别
+                if rms < volume_threshold:
+                    print(" → 静音/噪音，跳过本次识别\n")
+                    audio_buffer = []
+                    continue
+                
+                print(f" → 有效语音，开始识别...\n")
+                audio_buffer = []
                 
                 # 重采样到 16kHz（如果必要）
                 # 注意：实际项目中需要 proper resampling
