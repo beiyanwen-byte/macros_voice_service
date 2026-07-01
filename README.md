@@ -32,7 +32,7 @@ python3 app.py
 🚀 ASR Web GUI 启动中...
 ============================================================
 访问地址：http://localhost:5000
-输出目录：/Users/username/asr_project/transcripts
+输出目录：<your-project-path>/transcripts
 ============================================================
 ```
 
