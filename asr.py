@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/Users/tanyanwen/.qwenpaw/venv/bin/python3
 """
 Mac 系统音频识别命令行工具
 使用 FunASR paraformer-zh 模型进行语音识别
@@ -89,19 +89,15 @@ def list_devices():
 PYTHON_CMD = "/Users/tanyanwen/.qwenpaw/venv/bin/python3"
 
 def start_asr():
-    """启动 ASR 服务（前台模式，直接显示日志）"""
+    """启动 ASR 服务（直接在当前进程运行）"""
     # 确保 transcripts 目录存在
     TRANSCRIPTS_DIR.mkdir(exist_ok=True)
     
-    import subprocess
+    # 导入核心模块
+    from asr_core import ASREngine
+    
     timestamp = datetime.now().strftime("%Y-%m-%d_%H%M")
     output_file = TRANSCRIPTS_DIR / f"{timestamp}.txt"
-    
-    cmd = [
-        PYTHON_CMD,
-        str(PROJECT_ROOT / "asr_core.py"),
-        "--output", str(output_file)
-    ]
     
     print(f"\n🚀 正在启动 ASR 服务...")
     print(f"📁 识别结果将保存到：{output_file}")
@@ -111,15 +107,45 @@ def start_asr():
     sys.stdout.flush()
     sys.stderr.flush()
     
-    # 使用当前进程的 env 和输出流
-    env = os.environ.copy()
-    env['PYTHONUNBUFFERED'] = '1'
+    # 创建引擎
+    def log_callback(msg, level):
+        prefix = {"info": "", "success": "✅ ", "warning": "⚠️ ", "error": "❌ "}.get(level, "")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] {prefix}{msg}")
     
-    process = subprocess.run(cmd, env=env, cwd=str(PROJECT_ROOT))
+    engine = ASREngine(log_callback=log_callback)
     
-    print("\n" + "=" * 60)
-    print("ASR 服务已停止")
-    print("=" * 60)
+    # 加载模型
+    print("正在加载模型（首次约 30-60 秒）...")
+    sys.stdout.flush()
+    if not engine.load_model():
+        print("❌ 模型加载失败")
+        return
+    
+    print("✅ 模型加载完成\n")
+    sys.stdout.flush()
+    
+    # 保存 PID
+    with open(PID_FILE, 'w') as f:
+        f.write(str(os.getpid()))
+    
+    # 开始识别
+    try:
+        engine.start_recognition(output_file=str(output_file))
+        print("🎤 识别已启动，请播放音频或说话...")
+        print("按 Ctrl+C 停止\n")
+        
+        # 保持运行
+        while True:
+            time.sleep(1)
+            
+    except KeyboardInterrupt:
+        print("\n⏹️  正在停止...")
+        engine.stop_recognition()
+        print("✅ ASR 服务已停止")
+    finally:
+        # 清理 PID 文件
+        if PID_FILE.exists():
+            os.remove(PID_FILE)
 
 
 def main():
