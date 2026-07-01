@@ -20,10 +20,18 @@ Web-based voice recognition service using FunASR paraformer-zh model, **converti
 
 ## 🚀 快速开始 / Quick Start
 
-### 1. 启动 Web 服务 / Start Web Service
+### 1. 启动 Web 服务 / Start Service
 
+**方法 1: 使用启动脚本（推荐）**
 ```bash
 cd asr_project
+./start.sh
+```
+
+**方法 2: 手动启动**
+```bash
+cd asr_project
+# 确保已激活 virtualenv: source venv/bin/activate
 python3 app.py
 ```
 
@@ -37,6 +45,39 @@ python3 app.py
 ```
 
 ### 2. 浏览器访问 / Open Browser
+
+打开浏览器访问：**`http://localhost:5000`**
+
+### 3. 操作步骤 / Steps
+
+| 步骤 | 操作 | 说明 |
+|------|------|------|
+| 1 | 点击 **"🔽 加载模型"** | 首次约 60 秒，之后自动缓存 |
+| 2 | 按钮变亮后点击 **"▶️ 开始识别"** | 立即开始，无需等待 |
+| 3 | 播放音频（B 站/会议/播客） | 日志区实时显示识别结果 |
+| 4 | 点击 **"⏹️ 停止"** | Web 界面优雅停止 |
+| 5 | Ctrl+C 或运行 `./stop.sh` | 完全退出服务器进程 |
+
+### 4. 停止服务 / Stop Service
+
+**方法 1: Web 界面停止（最常用）**
+- 在浏览器中点击 **"⏹️ 停止"** 按钮 → 仅停止识别，保持服务运行
+
+**方法 2: CLI 脚本停止**
+```bash
+cd asr_project
+./stop.sh                 # 停止默认 5000 端口的服务
+./stop.sh 8080            # 停止指定端口的服务
+```
+
+**方法 3: 手动终止**
+```bash
+# 查找进程
+ps aux | grep 'app.py' | grep -v grep
+
+# 强制杀死
+kill -9 <PID>
+```
 
 打开浏览器访问：**`http://localhost:5000`**
 

@@ -92,5 +92,8 @@ echo "Starting Web Server on http://localhost:5000"
 echo "Press Ctrl+C to stop the server"
 echo ""
 
+# 保存 PID 到文件（供 stop.sh 使用）
+echo $$ > "$PROJECT_ROOT/.asr.pid"
+
 # 启动服务
 exec python3 app.py
