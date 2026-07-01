@@ -2,15 +2,16 @@
 # ASR Web Service Launcher
 # 
 # 支持所有用户在任何机器上运行
-# 无需预先安装 QwenPaw，自动检测或使用虚拟环境
+# 自动创建虚拟环境并安装正确的依赖包
 #
 # Usage:
 #   ./start.sh                    # 使用当前激活的 virtualenv
-#   bash start.sh                 # 同上（Windows PowerShell）
+#   bash start.sh                 # Windows PowerShell
 #
 # 或者手动创建虚拟环境后运行：
 #   python3 -m venv venv
 #   source venv/bin/activate
+#   pip install -r requirements.txt
 #   python app.py
 
 set -e
@@ -46,12 +47,11 @@ else
         echo ""
         echo "  Option 1 (Recommended):"
         echo "    python3 -m venv venv"
-        echo "    source venv/bin/activate"
-        echo "    pip install flask torch funasr sounddevice numpy pydub"
+        echo "    source venv/bin/activate  # macOS/Linux"
+        echo "    or venv\\Scripts\\activate # Windows"
         echo ""
-        echo "  Option 2 (Use your own env):"
-        echo "    conda create -n asr_env python=3.10"
-        echo "    conda activate asr_env"
+        echo "Then install dependencies:"
+        echo "    pip install --upgrade pip"
         echo "    pip install flask torch funasr sounddevice numpy pydub"
         echo ""
         exit 0
@@ -74,12 +74,26 @@ fi
 # 切换到项目目录
 cd "$PROJECT_ROOT"
 
+# 升级 pip
+echo "Upgrading pip..."
+python3 -m pip install --upgrade pip --quiet
+
 # 检查并安装依赖
-echo "Checking dependencies..."
-python3 -c "import flask; import torch; import funasr; import sounddevice" 2>/dev/null || {
-    echo "⚠️  Some dependencies are missing. Installing now..."
-    pip install --quiet flask torch funasr sounddevice numpy pydub
-}
+echo "Installing dependencies..."
+if [ -f "requirements.txt" ]; then
+    pip install --quiet -r requirements.txt
+else
+    # 如果没有 requirements.txt，安装基本依赖
+    echo "Using bundled dependency versions for stability..."
+    pip install --quiet \
+        "funasr==1.1.9" \
+        "torch==2.2.2" \
+        "numpy<2.0" \
+        "flask" \
+        "sounddevice" \
+        "pydub" \
+        --index-url https://download.pytorch.org/whl/cpu
+fi
 
 echo ""
 echo "✅ All dependencies installed successfully!"

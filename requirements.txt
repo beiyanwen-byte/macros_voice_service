@@ -1,4 +1,17 @@
-﻿funasr>=1.0.0
+﻿# ASR Web Service Dependencies
+# 语音识别工具依赖清单
+# 已针对 macOS CPU 优化版本
+
+# Web Framework (Web 框架)
+flask>=2.0.0
+
+# Audio Processing (音频处理)
 sounddevice>=0.4.6
+pydub>=0.25.0
 numpy<2.0,>=1.21.0
-torchaudio>=0.10.0
+
+# AI/ML Models (人工智能模型)
+# 注意：PyTorch 2.2.2 是 macOS CPU 最高支持版本
+torch==2.2.2
+torchaudio==2.2.2
+funasr==1.1.9
