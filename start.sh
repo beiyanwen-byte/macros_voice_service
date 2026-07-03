@@ -69,21 +69,49 @@ echo "🔧 Upgrading pip..."
 python3 -m pip install --upgrade pip --quiet
 
 # 检查并安装依赖
-echo "📦 Installing dependencies..."
-if [ -f "requirements.txt" ]; then
-    pip install --quiet -r requirements.txt
-else
-    # 如果没有 requirements.txt，安装基本依赖
-    echo "   Using bundled dependency versions for stability..."
-    pip install --quiet \
-        "funasr==1.1.9" \
-        "torch==2.2.2" \
-        "numpy<2.0" \
-        "flask" \
-        "sounddevice" \
-        "pydub" \
+echo "📦 Installing dependencies (optimized for macOS)..."
+echo "   → Key: numba==0.59.1 + numpy==1.26.4 for ABI compatibility"
+echo ""
+echo "This may take a few minutes (downloading PyTorch ~800MB)..."
+echo "Please wait..."
+echo ""
+
+pip install \
+    torch==2.2.2 \
+    torchaudio==2.2.2 \
+    numpy==1.26.4 \
+    scipy==1.12.0 \
+    numba==0.59.1 \
+    --index-url https://download.pytorch.org/whl/cpu \
+    --only-binary=:all: \
+    --quiet || {
+    echo "⚠️ Falling back to normal install mode..."
+    pip install \
+        torch==2.2.2 \
+        torchaudio==2.2.2 \
+        numpy==1.26.4 \
+        scipy==1.12.0 \
+        numba==0.59.1 \
         --index-url https://download.pytorch.org/whl/cpu
-fi
+}
+
+pip install \
+    funasr==1.1.9 \
+    flask>=2.0.0 \
+    sounddevice>=0.4.6 \
+    pydub>=0.25.0 \
+    librosa>=0.10.0 \
+    modelscope \
+    omegaconf \
+    transformers \
+    tensorboardX \
+    torch-complex \
+    hydra-core \
+    kaldiio \
+    jaconv \
+    jamo \
+    editdistance \
+    --quiet
 
 echo ""
 echo "✅ All dependencies installed successfully!"
@@ -95,5 +123,5 @@ echo ""
 # 保存 PID 到文件（供 stop.sh 使用）
 echo $$ > "$PROJECT_ROOT/.asr.pid"
 
-# 启动服务
+# 启动服务（使用当前激活环境的 python3，确保与 pip install 一致）
 exec python3 app.py

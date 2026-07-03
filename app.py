@@ -11,6 +11,9 @@ from datetime import datetime
 from pathlib import Path
 from flask import Flask, render_template_string, jsonify, request
 
+# Import ASREngine from core module
+from asr_core import ASREngine
+
 PROJECT_ROOT = Path(__file__).parent
 TRANSCRIPTS_DIR = PROJECT_ROOT / "transcripts"
 TRANSCRIPTS_DIR.mkdir(exist_ok=True)

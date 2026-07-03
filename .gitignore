@@ -28,8 +28,7 @@ wheels/
 
 # ASR Project
 .asr_pid
-transcripts/*.txt
-transcripts/*.log
+transcripts/*.*
 logs/
 
 # IDE
