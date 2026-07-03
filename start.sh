@@ -111,6 +111,24 @@ pip install \
     jaconv \
     jamo \
     editdistance \
+    sentencepiece \
+    jieba \
+    pytorch-wpe \
+    --quiet
+
+# 额外显式安装关键间接依赖（确保完整性）
+echo "   → Installing additional dependencies..."
+pip install \
+    decorator \
+    joblib \
+    msgpack \
+    pooch \
+    lazy_loader \
+    platformdirs \
+    narwhals \
+    threadpoolctl \
+    audioread \
+    soxr \
     --quiet
 
 echo ""

@@ -43,6 +43,20 @@ PyYAML>=6.0.0
 tqdm>=4.68.0
 requests>=2.31.0
 
+# librosa indirect deps (librosa 的间接依赖 - 显式列出确保完整性)
+decorator>=5.0.0
+joblib>=1.0.0
+msgpack>=1.0.0
+pooch>=1.0.0
+lazy_loader>=0.1.0
+audioread>=3.0.0
+soxr>=0.3.0
+
+# scikit-learn & huggingface_hub indirect deps (间接依赖)
+platformdirs>=4.0.0
+narwhals>=1.0.0
+threadpoolctl>=3.0.0
+
 # Note: Do NOT upgrade numpy/scipy/numba beyond above versions!
 # NumPy 2.x is incompatible with PyTorch 2.2.2
 # Numba 0.60+ has ABI issues with numpy 1.26.4
