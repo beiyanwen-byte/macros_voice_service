@@ -300,9 +300,9 @@ HTML_TEMPLATE = """
         // 初始化
         document.getElementById('output-dir').textContent = '/Users/tanyanwen/asr_project/transcripts';
         
-        // 立即执行一次，然后每 500ms 轮询
+        // 立即执行一次，然后每 1 秒轮询（降低服务器压力）
         pollStatusAndLogs();
-        setInterval(pollStatusAndLogs, 500);
+        setInterval(pollStatusAndLogs, 1000);
     </script>
 </body>
 </html>
