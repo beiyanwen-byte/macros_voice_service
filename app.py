@@ -247,6 +247,17 @@ HTML_TEMPLATE = """
                 // 1. 先获取状态
                 const statusRes = await fetch('/api/status');
                 const statusData = await statusRes.json();
+                
+                // 检测录制状态变化（用于清理日志缓存）
+                const wasRecording = document.body.dataset.recording === 'true';
+                document.body.dataset.recording = statusData.is_recording;
+                
+                // 如果从录制状态退出，清除日志去重缓存（防止 ID 复用导致的显示问题）
+                if (wasRecording && !statusData.is_recording) {
+                    console.log('Recording stopped, clearing log cache...');
+                    sessionStorage.removeItem('asr_seen_logs');
+                }
+                
                 updateButtons(statusData);
                 
                 // 2. 再获取日志
@@ -254,12 +265,31 @@ HTML_TEMPLATE = """
                 const logsData = await logsRes.json();
                 
                 if (logsData.logs && logsData.logs.length > 0) {
-                    const lastId = parseInt(document.getElementById('log-container').dataset.lastId || '0');
+                    // 使用 sessionStorage 存储已显示的日志 key（时间戳 + 内容）
+                    const seenLogs = new Set(JSON.parse(sessionStorage.getItem('asr_seen_logs') || '[]'));
+                    let hasNewLogs = false;
+                    
                     for (const log of logsData.logs) {
-                        if (log.id > lastId) {
+                        // 使用"时间戳 + 消息内容"作为唯一标识
+                        const logKey = `${log.time}|${log.level}|${log.msg}`;
+                        
+                        if (!seenLogs.has(logKey)) {
+                            seenLogs.add(logKey);
                             addLog(log.time, log.level, log.msg);
-                            document.getElementById('log-container').dataset.lastId = log.id;
+                            hasNewLogs = true;
                         }
+                    }
+                    
+                    // 定期清理旧记录（只保留最近 500 条）
+                    if (hasNewLogs && seenLogs.size > 500) {
+                        const arr = Array.from(seenLogs).slice(-500);
+                        seenLogs.clear();
+                        arr.forEach(k => seenLogs.add(k));
+                    }
+                    
+                    // 保存回 sessionStorage
+                    if (seenLogs.size > 0) {
+                        sessionStorage.setItem('asr_seen_logs', JSON.stringify(Array.from(seenLogs)));
                     }
                 }
             } catch (err) {
