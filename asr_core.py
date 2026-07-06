@@ -40,7 +40,9 @@ class ASREngine:
         self.audio_buffer = []
         self.sample_rate = 16000
         self.buffer_duration = 10.0  # 10 秒滑动窗口
-        self.volume_threshold = 0.005  # 音量阈值（降低以适应内置麦克风的低音量）
+        self.volume_threshold = 0.0002  # 音量阈值（根据 RMS 测试结果：小音量视频 RMS 约 0.001）
+        self.auto_gain_enabled = True  # 启用自动增益补偿
+        self.target_rms = 0.01  # 目标 RMS 值（增益补偿后）
         
         self.stream = None
         self.queue = Queue()
@@ -184,16 +186,23 @@ class ASREngine:
                 
                 # 音量检测
                 rms = np.sqrt(np.mean(audio_data ** 2))
-                print(f"[DEBUG] RMS={rms:.4f}, threshold={self.volume_threshold}", flush=True)
                 
                 if rms < self.volume_threshold:
                     silence_count += 1
                     if silence_count % 5 == 0:
-                        print(f"[DEBUG] 静音跳过 (连续 {silence_count} 次)", flush=True)
+                        print(f"[DEBUG] 静音跳过 (RMS={rms:.6f}, threshold={self.volume_threshold}, 连续 {silence_count} 次)", flush=True)
                     continue
                 
-                print(f"[DEBUG] 音量正常，开始识别...", flush=True)
                 silence_count = 0
+                
+                # 自动增益补偿（小音量放大）
+                if self.auto_gain_enabled and rms < self.target_rms:
+                    gain = self.target_rms / rms
+                    audio_data = audio_data * gain
+                    new_rms = np.sqrt(np.mean(audio_data ** 2))
+                    print(f"[DEBUG] 🔊 增益补偿：×{gain:.2f} (RMS: {rms:.6f} → {new_rms:.6f})", flush=True)
+                else:
+                    print(f"[DEBUG] ✅ 音量充足：RMS={rms:.6f}", flush=True)
                 
                 # 识别
                 try:
